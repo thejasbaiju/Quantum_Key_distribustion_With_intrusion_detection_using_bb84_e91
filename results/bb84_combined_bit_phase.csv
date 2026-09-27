@@ -1,0 +1,12 @@
+noise_strength,qber,key_length,noise_type
+0.0,0.0,48.4,combined_bit_phase
+0.05,0.04313783342846978,50.5,combined_bit_phase
+0.1,0.10239437138939664,49.1,combined_bit_phase
+0.15,0.13655418956420207,49.8,combined_bit_phase
+0.2,0.19304943005131509,51.0,combined_bit_phase
+0.25,0.2627900627658285,49.6,combined_bit_phase
+0.3,0.30811299720902063,49.4,combined_bit_phase
+0.35,0.35136196876415576,53.1,combined_bit_phase
+0.4,0.38501781871012175,49.1,combined_bit_phase
+0.45,0.44054203277596954,48.9,combined_bit_phase
+0.5,0.49927957730254097,47.7,combined_bit_phase

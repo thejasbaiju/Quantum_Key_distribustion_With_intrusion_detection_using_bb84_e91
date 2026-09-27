@@ -1,0 +1,12 @@
+noise_strength,chsh,chsh_std,bell_violation,noise_type
+0.0,2.8888,0.055333172690529744,True,amplitude_damping
+0.05,2.6464,0.044152463124949116,True,amplitude_damping
+0.1,2.4608000000000003,0.05983443824420841,True,amplitude_damping
+0.15,2.2328,0.08167839371584147,True,amplitude_damping
+0.2,2.1608,0.0381491808562124,True,amplitude_damping
+0.25,1.9032,0.12386831717594299,False,amplitude_damping
+0.3,1.8016,0.0840038094374297,False,amplitude_damping
+0.35,1.7207999999999999,0.07094335768766523,False,amplitude_damping
+0.4,1.5888,0.11831889113746803,False,amplitude_damping
+0.45,1.4768,0.021376622745419807,False,amplitude_damping
+0.5,1.3719999999999999,0.09288272175167989,False,amplitude_damping

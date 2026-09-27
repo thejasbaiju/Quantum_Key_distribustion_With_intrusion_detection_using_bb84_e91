@@ -1,0 +1,7 @@
+noise_type,qber_at_0.2,threshold_p
+bit_flip,0.0883629396526448,0.25
+phase_flip,0.0813804779874802,0.3
+depolarizing,0.1044359097663311,0.25
+amplitude_damping,0.0780132184551932,0.3
+readout_error,0.2131371058547789,0.15
+combined_bit_phase,0.193049430051315,0.15

@@ -1,0 +1,6 @@
+qiskit==2.5.0
+qiskit-aer==0.17.2
+numpy
+pandas
+matplotlib
+pytest

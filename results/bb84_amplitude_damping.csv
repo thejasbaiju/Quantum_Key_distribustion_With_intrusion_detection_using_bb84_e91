@@ -1,0 +1,12 @@
+noise_strength,qber,key_length,noise_type
+0.0,0.0,50.15,amplitude_damping
+0.05,0.025164747173788197,50.45,amplitude_damping
+0.1,0.042941039785780837,51.8,amplitude_damping
+0.15,0.06483548191585385,50.0,amplitude_damping
+0.2,0.07801321845519327,49.85,amplitude_damping
+0.25,0.09300908612631781,49.8,amplitude_damping
+0.3,0.12882543889315393,49.9,amplitude_damping
+0.35,0.11842339938682656,48.85,amplitude_damping
+0.4,0.16130601280823234,49.7,amplitude_damping
+0.45,0.18181220758851788,50.35,amplitude_damping
+0.5,0.20128804170432446,48.6,amplitude_damping
