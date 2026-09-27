@@ -1,6 +1,7 @@
 from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
 from noise.noise_models import bit_flip_noise
+from seeding import sim_seed
 import math
 import statistics
 import pandas as pd
@@ -36,7 +37,7 @@ def run_measurement(alice_angle, bob_angle, noise_model=None, shots=100):
     qc.measure_all()
 
     simulator = AerSimulator() if noise_model is None else AerSimulator(noise_model=noise_model)
-    result = simulator.run(qc, shots=shots).result()
+    result = simulator.run(qc, shots=shots, seed_simulator=sim_seed()).result()
     return result.get_counts()
 
 

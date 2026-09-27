@@ -7,6 +7,7 @@ from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
 from bb84.bb84 import generate_alice_data, prepare_qubit, sift_key, calculate_qber
 from e91.e91 import create_entangled_pair, measure_in_basis, calculate_correlation, calculate_chsh, a, a_prime, b, b_prime
+from seeding import sim_seed
 from noise.noise_models import bit_flip_noise, phase_flip_noise, depolarizing_noise, amplitude_damping_noise, readout_error_noise
 
 
@@ -31,7 +32,7 @@ def eve_intercept_resend_bb84(n, eve_intercept_prob, noise_model=None, simulator
             if eve_basis == "X":
                 eve_qc.h(0)
             eve_qc.measure(0, 0)
-            result = simulator.run(eve_qc, shots=1).result()
+            result = simulator.run(eve_qc, shots=1, seed_simulator=sim_seed()).result()
             counts = result.get_counts()
             eve_bit = int(list(counts.keys())[0])
             eve_qc = QuantumCircuit(1, 1)
@@ -42,10 +43,12 @@ def eve_intercept_resend_bb84(n, eve_intercept_prob, noise_model=None, simulator
             qc = eve_qc
 
         bob_qc = qc.copy()
+        # Quantum channel (noise models attach to 'id')
+        bob_qc.id(0)
         if bob_bases[i] == "X":
             bob_qc.h(0)
         bob_qc.measure(0, 0)
-        result = simulator.run(bob_qc, shots=1).result()
+        result = simulator.run(bob_qc, shots=1, seed_simulator=sim_seed()).result()
         counts = result.get_counts()
         bob_bit = int(list(counts.keys())[0])
         bob_bits.append(bob_bit)
@@ -147,7 +150,7 @@ def eve_intercept_resend_e91(eve_intercept_prob, noise_model=None, shots=500):
                     if n == 0:
                         continue
                     qc = _e91_eve_intercept_circuit(alice_angle, bob_angle, e_ang)
-                    raw = simulator.run(qc, shots=n).result().get_counts()
+                    raw = simulator.run(qc, shots=n, seed_simulator=sim_seed()).result().get_counts()
                     total = _add_counts(total, _e91_counts_to_ab(raw))
             E_vals.append(calculate_correlation(total))
         chsh_values.append(calculate_chsh(*E_vals))
@@ -170,7 +173,7 @@ def run_measurement_clean(alice_angle, bob_angle, simulator, shots):
     measure_in_basis(qc, 0, alice_angle)
     measure_in_basis(qc, 1, bob_angle)
     qc.measure_all()
-    return simulator.run(qc, shots=shots).result().get_counts()
+    return simulator.run(qc, shots=shots, seed_simulator=sim_seed()).result().get_counts()
 
 
 def _e91_with_eve(eve_intercept_prob, alice_angle, bob_angle, noise_model, simulator, shots):
@@ -193,7 +196,7 @@ def eve_intercept_resend_e91_single_setting(eve_intercept_prob, alice_angle, bob
         measure_in_basis(qc, 0, alice_angle)
         measure_in_basis(qc, 1, bob_angle)
         qc.measure_all()
-        total = _add_counts(total, simulator.run(qc, shots=n_clean).result().get_counts())
+        total = _add_counts(total, simulator.run(qc, shots=n_clean, seed_simulator=sim_seed()).result().get_counts())
     if n_eve > 0:
         per = n_eve // 4
         rem = n_eve % 4
@@ -202,7 +205,7 @@ def eve_intercept_resend_e91_single_setting(eve_intercept_prob, alice_angle, bob
             if n == 0:
                 continue
             qc = _e91_eve_intercept_circuit(alice_angle, bob_angle, e_ang)
-            raw = simulator.run(qc, shots=n).result().get_counts()
+            raw = simulator.run(qc, shots=n, seed_simulator=sim_seed()).result().get_counts()
             total = _add_counts(total, _e91_counts_to_ab(raw))
     return total
 

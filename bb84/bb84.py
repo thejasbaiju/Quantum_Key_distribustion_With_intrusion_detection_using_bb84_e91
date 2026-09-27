@@ -4,6 +4,7 @@ from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
 
 from noise.noise_models import bit_flip_noise
+from seeding import sim_seed
 
 
 def generate_alice_data(n):
@@ -64,7 +65,8 @@ def measure_qubit(qc, basis, simulator):
 
     result = simulator.run(
         bob_qc,
-        shots=1
+        shots=1,
+        seed_simulator=sim_seed()
     ).result()
 
     counts = result.get_counts()

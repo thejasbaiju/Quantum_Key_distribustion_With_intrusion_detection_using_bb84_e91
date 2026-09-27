@@ -34,10 +34,10 @@ How do different quantum channel noise models and eavesdropping strategies affec
 
 | Noise Model | Mechanism | BB84 Effect |
 |---|---|---|
-| **Bit-flip** | Pauli-X with probability p | QBER = p |
+| **Bit-flip** | Pauli-X with probability p | QBER = p/2 (Z-basis only) |
 | **Phase-flip** | Pauli-Z with probability p | QBER = p/2 (X-basis only) |
-| **Depolarizing** | Mixed X/Y/Z with probability p | QBER ≈ p/3 |
-| **Amplitude damping** | |1⟩ decays to |0⟩ with probability γ | QBER ≈ γ/2 |
+| **Depolarizing** | Mixed X/Y/Z with probability p | QBER ≈ p/2 |
+| **Amplitude damping** | |1⟩ decays to |0⟩ with probability γ | QBER ≈ γ/4 + (1−√(1−γ))/4 ≈ 3γ/8 (γ/2 in Z basis only) |
 | **Readout error** | Measurement bit-flip with probability p | QBER = p |
 | **Combined bit+phase** | Simultaneous X and Z errors | QBER ≈ p |
 
