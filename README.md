@@ -124,6 +124,6 @@ The suite contains 25 tests covering noise-model correctness against theory, BB8
 
 ## Author
 
-ALIYA PATHAN
-
-GitHub: https://github.com/alia5252
+Thejas Baiju
+Pranav M Nair
+Soorya Narayanan
