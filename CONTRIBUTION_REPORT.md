@@ -50,10 +50,10 @@
 
 | Noise Type | Theoretical QBER | Measured (p=0.1) |
 |---|---|---|
-| Bit-flip (p) | p | ~0.079 |
+| Bit-flip (p) | p/2 | ~0.079 |
 | Phase-flip (p) | p/2 | ~0.046 |
-| Depolarizing (p) | p/3 | ~0.053 |
-| Amplitude damping (γ) | γ/2 | ~0.080 |
+| Depolarizing (p) | p/2 | ~0.053 |
+| Amplitude damping (γ) | γ/4 + (1−√(1−γ))/4 ≈ 3γ/8 | ~0.080 |
 | Readout error (p) | p | ~0.053 |
 | Combined bit+phase (p,p) | ~p | ~0.089 |
 

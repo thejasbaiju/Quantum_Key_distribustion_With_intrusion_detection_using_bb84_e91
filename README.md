@@ -34,10 +34,10 @@ How do different quantum channel noise models and eavesdropping strategies affec
 
 | Noise Model | Mechanism | BB84 Effect |
 |---|---|---|
-| **Bit-flip** | Pauli-X with probability p | QBER = p |
+| **Bit-flip** | Pauli-X with probability p | QBER = p/2 (Z-basis only) |
 | **Phase-flip** | Pauli-Z with probability p | QBER = p/2 (X-basis only) |
-| **Depolarizing** | Mixed X/Y/Z with probability p | QBER ≈ p/3 |
-| **Amplitude damping** | |1⟩ decays to |0⟩ with probability γ | QBER ≈ γ/2 |
+| **Depolarizing** | Mixed X/Y/Z with probability p | QBER ≈ p/2 |
+| **Amplitude damping** | |1⟩ decays to |0⟩ with probability γ | QBER ≈ γ/4 + (1−√(1−γ))/4 ≈ 3γ/8 (γ/2 in Z basis only) |
 | **Readout error** | Measurement bit-flip with probability p | QBER = p |
 | **Combined bit+phase** | Simultaneous X and Z errors | QBER ≈ p |
 
@@ -58,14 +58,18 @@ QKD_project/
 ├── e91/            # E91 protocol implementation
 ├── noise/          # Noise channel models (Aer)
 ├── experiments/    # Noise sweeps, Eve attacks, completeness runs
+├── backends/       # Aer / simulated IBM / real IBM runners, batched protocols
 ├── plots/          # Graph-generation scripts and output PNGs
 ├── results/        # CSV result data
 ├── tests/          # pytest test suite
+├── verification/   # Independent verification script and report
 ├── CONTRIBUTION_REPORT.md
 ├── README.md
 ├── requirements.txt
 ├── .gitignore
-└── run_experiments.py
+├── seeding.py      # Reproducible seeds for Python and Aer
+├── run_experiments.py
+└── run_ibm.py      # Run BB84/E91 on Aer or IBM backends
 ```
 
 ## Installation
@@ -98,18 +102,61 @@ Generate all final graphs:
 python -m plots.plot_combined
 ```
 
+## Running on IBM Quantum
+
+`run_ibm.py` runs BB84 and E91 (with optional intercept-resend) on three kinds of backend through one interface (`backends/`):
+
+| `--backend` | What it is | Account needed |
+|---|---|---|
+| `aer` | Local Aer simulator (ideal) | No |
+| `fake_<device>`, e.g. `fake_torino` | Local simulation using an IBM device's calibrated noise (28 devices in `qiskit_ibm_runtime.fake_provider`) | No |
+| `ibm_<device>`, e.g. `ibm_torino` | Real IBM Quantum hardware | Yes |
+
+```bash
+python run_ibm.py --backend fake_torino --eve 0 0.5 1
+```
+
+Example output on `fake_torino` (seed 1234):
+
+| Eve intercept prob | BB84 QBER | ideal | E91 S | ideal |
+|---|---|---|---|---|
+| 0.0 | 0.014 | 0.000 | 2.702 | 2.828 |
+| 0.5 | 0.125 | 0.125 | 2.043 | 2.121 |
+| 1.0 | 0.240 | 0.250 | 1.373 | 1.414 |
+
+Both protocols still detect a full intercept-resend attack under realistic device noise. Note that at 50% interception BB84 aborts (QBER > 11%) while E91 still shows a Bell violation (S ≈ 2.04).
+
+**Real hardware.** Create an account at [quantum.cloud.ibm.com](https://quantum.cloud.ibm.com), then either save it once:
+
+```python
+from qiskit_ibm_runtime import QiskitRuntimeService
+QiskitRuntimeService.save_account(token="<your API key>", channel="ibm_quantum_platform")
+```
+
+or set the `QISKIT_IBM_TOKEN` environment variable. Never commit the token. Real devices use your QPU allowance, so the script requires `--hardware`:
+
+```bash
+python run_ibm.py --backend ibm_torino --eve 0 1 --n 1000 --shots 2000 --hardware
+```
+
+**How it differs from the Aer experiments:**
+- **BB84 is batched.** Only 8 distinct circuits exist (bit × Alice basis × Bob basis), so each runs once with shots equal to the rounds that use it, and outcomes are mapped back to the rounds. A run is one or two jobs instead of one job per qubit.
+- **Custom noise models apply only to `aer`.** They attach to `id` gates, which device transpilers remove; IBM devices supply their own noise.
+- **Circuits are transpiled at optimization level 3**, which picks qubits using calibration data. At level 1 these small circuits land on qubit 0, which on `fake_torino` has about 17% readout error (the median is 2%).
+- E91 Eve attacks use mid-circuit measurement, reset and `if_test`, which IBM's Heron devices support.
+
 ## Testing
 
 ```bash
 python -m pytest tests/ -v
 ```
 
-The suite contains 25 tests covering noise-model correctness against theory, BB84 QBER bounds, E91 CHSH bounds, sifting, and input validation.
+The suite contains 40 tests covering noise-model correctness against theory, BB84 QBER bounds, E91 CHSH bounds, intercept-resend attacks, batched IBM backends (including a simulated IBM Torino), sifting, and input validation.
 
 ## Scope
 
 **In scope:**
-- BB84 and E91 protocol simulation on Qiskit Aer
+- BB84 and E91 protocol simulation on Qiskit Aer, simulated IBM devices, and IBM Quantum hardware
 - Five noise models plus combined bit+phase noise
 - Intercept-resend eavesdropping on both protocols
 - QBER and CHSH security analysis with threshold identification
@@ -119,11 +166,11 @@ The suite contains 25 tests covering noise-model correctness against theory, BB8
 - Post-selection / error-correction / privacy-amplification stages
 - Photon-number-splitting and Trojan-horse attacks
 - Finite-key analysis
-- Hardware/real-device noise characterization
+- Systematic real-device noise characterization (single runs on IBM devices are supported via `run_ibm.py`)
 - Decoy-state BB84 variants
 
 ## Author
 
-ALIYA PATHAN
-
-GitHub: https://github.com/alia5252
+Thejas Baiju
+Pranav M Nair
+Soorya Narayanan

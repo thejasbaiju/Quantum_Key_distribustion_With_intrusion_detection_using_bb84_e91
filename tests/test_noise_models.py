@@ -8,6 +8,8 @@ from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
 import numpy as np
 
+from tests.helpers import assert_qber_near
+
 
 def test_bit_flip_qber():
     """Bit-flip noise on |0> gives P(1)=p."""
@@ -59,33 +61,34 @@ def test_readout_error():
 
 
 def test_bit_flip_qber_bb84():
-    """Full BB84 with bit-flip noise: QBER should be close to p."""
-    result = run_bb84(500, bit_flip_noise(0.1))
-    assert 0.03 < result["qber"] < 0.17, f"QBER {result['qber']} not in expected range"
+    """Full BB84 with bit-flip noise: QBER ~ p/2 (X errors only affect Z-basis bits)."""
+    result = run_bb84(2000, bit_flip_noise(0.1))
+    assert_qber_near(result, 0.05)
 
 
 def test_phase_flip_qber_bb84():
     """Full BB84 with phase-flip noise: QBER should be close to p/2."""
-    result = run_bb84(500, phase_flip_noise(0.1))
-    assert 0.03 < result["qber"] < 0.08, f"QBER {result['qber']} not in expected range"
+    result = run_bb84(2000, phase_flip_noise(0.1))
+    assert_qber_near(result, 0.05)
 
 
 def test_amplitude_damping_qber_bb84():
-    """Full BB84 with amplitude damping: QBER ~ gamma/2."""
-    result = run_bb84(500, amplitude_damping_noise(0.2))
-    assert 0.05 < result["qber"] < 0.15, f"QBER {result['qber']} not in expected range"
+    """Full BB84 with amplitude damping: QBER ~ gamma/4 + (1 - sqrt(1-gamma))/4."""
+    gamma = 0.2
+    result = run_bb84(2000, amplitude_damping_noise(gamma))
+    assert_qber_near(result, gamma / 4 + (1 - np.sqrt(1 - gamma)) / 4)
 
 
 def test_depolarizing_qber_bb84():
-    """Full BB84 with depolarizing noise: QBER ~ p/3."""
-    result = run_bb84(500, depolarizing_noise(0.15))
-    assert 0.03 < result["qber"] < 0.15, f"QBER {result['qber']} not in expected range"
+    """Full BB84 with depolarizing noise: QBER ~ p/2."""
+    result = run_bb84(2000, depolarizing_noise(0.15))
+    assert_qber_near(result, 0.075)
 
 
 def test_readout_error_qber_bb84():
     """Full BB84 with readout error: QBER ~ p_readerr."""
-    result = run_bb84(500, readout_error_noise(0.1))
-    assert 0.05 < result["qber"] < 0.20, f"QBER {result['qber']} not in expected range"
+    result = run_bb84(2000, readout_error_noise(0.1))
+    assert_qber_near(result, 0.1)
 
 
 def test_sift_key():
