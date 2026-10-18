@@ -1,9 +1,6 @@
 # Quantum Key Distribution with Intrusion Detection using BB84 & E91
 
-> **Attribution:** The simulation code in this repository is based on
-> [alia5252/QKD-BB84-E91-SIMULATION](https://github.com/alia5252/QKD-BB84-E91-SIMULATION)
-> (commit `f415494`). See [NOTICE](NOTICE). Independent verification of its results is in
-> [verification/VERIFICATION.md](verification/VERIFICATION.md).
+
 
 
 ## Project Overview
