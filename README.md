@@ -50,6 +50,42 @@ All noise is applied via Qiskit Aer noise models attached to the identity (chann
 - **Key-generation efficiency** — sifted key length as a fraction of transmitted qubits (≈50% from basis sifting).
 - **Eve attack probability** — intercept-resend probability sweep, measured against both QBER and CHSH.
 
+## Statistical Intrusion Detector
+
+The detector does not accept a session from the raw point estimates `QBER < 11%`
+or `S > 2`. It applies conservative Hoeffding confidence bounds at a configurable
+error probability `alpha` (1% by default):
+
+- BB84 randomly discloses `k` sifted check bits, removes them from the candidate
+  key, and reports `SECURE`, `ABORT`, or `INCONCLUSIVE`. An inconclusive result is
+  treated as an operational abort.
+- E91 accepts only when the simultaneous lower confidence bound for the CHSH
+  value remains above the classical limit of 2.
+
+Run the confidence-aware detector on a supported backend:
+
+```bash
+python run_ibm.py --backend aer --eve 0 0.5 1 --check-bits 256 --alpha 0.01
+```
+
+Generate the full-intercept detection-probability result and the asymptotic
+secret-key-fraction result:
+
+```bash
+python -m experiments.detection_probability --trials 20000
+python -m experiments.secret_key_rate
+python -m experiments.basis_diagnostic
+python -m experiments.breidbart_attack
+python -m experiments.partial_interception
+```
+
+The detection-probability experiment compares Monte Carlo simulation with
+`P(detect) = 1 - (3/4)^k`. The secret fraction uses
+`r = max(0, 1 - 2 h2(Q))`, which reaches zero at approximately 11% QBER.
+The basis diagnostic distinguishes bit-flip-like and phase-flip-like error
+asymmetry but never treats that classification as a security proof. The
+Breidbart experiment separately reports Eve's bit-error rate and Bob's QBER.
+
 ## Repository Structure
 
 ```
@@ -59,6 +95,8 @@ QKD_project/
 ├── noise/          # Noise channel models (Aer)
 ├── experiments/    # Noise sweeps, Eve attacks, completeness runs
 ├── backends/       # Aer / simulated IBM / real IBM runners, batched protocols
+├── attacks/        # Additional eavesdropping strategies such as Breidbart
+├── detection/      # Statistical decisions, detection probability, key-rate metrics
 ├── plots/          # Graph-generation scripts and output PNGs
 ├── results/        # CSV result data
 ├── tests/          # pytest test suite
@@ -151,7 +189,7 @@ python run_ibm.py --backend ibm_torino --eve 0 1 --n 1000 --shots 2000 --hardwar
 python -m pytest tests/ -v
 ```
 
-The suite contains 40 tests covering noise-model correctness against theory, BB84 QBER bounds, E91 CHSH bounds, intercept-resend attacks, batched IBM backends (including a simulated IBM Torino), sifting, and input validation.
+The suite contains 58 tests covering noise-model correctness against theory, BB84 QBER bounds, E91 CHSH bounds, confidence-aware intrusion decisions, disclosed-bit removal, basis diagnostics, detection probability, secret-key fraction, intercept-resend and Breidbart attacks, batched IBM backends (including a simulated IBM Torino), sifting, and input validation.
 
 ## Scope
 

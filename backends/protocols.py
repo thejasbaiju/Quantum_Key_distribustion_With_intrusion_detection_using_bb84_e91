@@ -86,10 +86,16 @@ def run_bb84_batched(n, runner, eve_prob=0.0):
     bob_bits = measure_batched(preps, bob_bases, runner)
 
     alice_key, bob_key = sift_key(alice_bits, alice_bases, bob_bases, bob_bits)
+    sifted_bases = [
+        alice_basis
+        for alice_basis, bob_basis in zip(alice_bases, bob_bases)
+        if alice_basis == bob_basis
+    ]
 
     return {
         "alice_key": alice_key,
         "bob_key": bob_key,
+        "sifted_bases": sifted_bases,
         "qber": calculate_qber(alice_key, bob_key),
         "key_length": len(alice_key),
         "intercepted": len(intercepted),
