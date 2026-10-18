@@ -16,6 +16,8 @@ import sys
 
 from backends.protocols import run_bb84_batched, run_e91_batched, ideal_bb84_qber, ideal_e91_chsh
 from backends.runners import get_runner
+from detection.statistical import bb84_statistical_test, e91_statistical_test
+from detection.basis_diagnostic import diagnose_basis_errors
 from seeding import seed_all
 
 
@@ -26,6 +28,8 @@ def main(argv=None):
     parser.add_argument("--eve", type=float, nargs="+", default=[0.0, 1.0], help="intercept probabilities to run (default: 0 1)")
     parser.add_argument("--n", type=int, default=2000, help="BB84 qubits sent per run (default: 2000)")
     parser.add_argument("--shots", type=int, default=4000, help="E91 shots per CHSH setting (default: 4000)")
+    parser.add_argument("--check-bits", type=int, default=256, help="BB84 sifted bits disclosed for parameter estimation (default: 256)")
+    parser.add_argument("--alpha", type=float, default=0.01, help="statistical error probability for confidence bounds (default: 0.01)")
     parser.add_argument("--seed", type=int, default=1234)
     parser.add_argument("--hardware", action="store_true", help="required for ibm_* backends: confirms you want to spend QPU time")
     args = parser.parse_args(argv)
@@ -40,20 +44,50 @@ def main(argv=None):
 
     if args.protocol in ("bb84", "all"):
         print(f"BB84, {args.n} qubits per run")
-        print(f"{'eve prob':>9} {'QBER':>8} {'ideal':>7} {'sifted':>7}  verdict (QBER < 11%)")
+        print(f"{'eve prob':>9} {'sample Q':>9} {'bounds':>17} {'remain':>7}  statistical verdict")
         for p in args.eve:
             r = run_bb84_batched(args.n, runner, p)
-            verdict = "secure" if r["qber"] < 0.11 else "ABORT: eavesdropper/noise"
-            print(f"{p:>9.2f} {r['qber']:>8.4f} {ideal_bb84_qber(p):>7.4f} {r['key_length']:>7}  {verdict}")
+            k = min(args.check_bits, r["key_length"])
+            if k == 0:
+                print(f"{p:>9.2f} {'n/a':>9} {'no sifted key':>17} {0:>7}  ABORT")
+                continue
+            detector = bb84_statistical_test(r["alice_key"], r["bob_key"], k, alpha=args.alpha)
+            bounds = f"[{detector['lower_bound']:.3f},{detector['upper_bound']:.3f}]"
+            print(
+                f"{p:>9.2f} {detector['qber']:>9.4f} {bounds:>17} "
+                f"{detector['remaining_key_length']:>7}  "
+                f"{detector['decision']} -> {detector['operational_decision']}"
+            )
+            print(f"{'':>11}noise-free expected QBER={ideal_bb84_qber(p):.4f}; {detector['reason']}")
+            check_bases = [r["sifted_bases"][i] for i in detector["check_indices"]]
+            diagnostic = diagnose_basis_errors(
+                detector["alice_check"], detector["bob_check"], check_bases
+            )
+            z_qber = diagnostic["z_basis"]["qber"]
+            x_qber = diagnostic["x_basis"]["qber"]
+            z_text = "n/a" if z_qber is None else f"{z_qber:.3f}"
+            x_text = "n/a" if x_qber is None else f"{x_qber:.3f}"
+            print(
+                f"{'':>11}basis diagnostic={diagnostic['classification']} "
+                f"(Z={z_text}, X={x_text}); diagnostic only"
+            )
         print()
 
     if args.protocol in ("e91", "all"):
         print(f"E91 CHSH, {args.shots} shots per setting")
-        print(f"{'eve prob':>9} {'S':>8} {'ideal':>7}  verdict (S > 2)")
+        print(f"{'eve prob':>9} {'S':>8} {'lower':>8} {'ideal':>8}  statistical verdict")
         for p in args.eve:
             r = run_e91_batched(args.shots, runner, p)
-            verdict = "secure" if r["bell_violation"] else "ABORT: no Bell violation"
-            print(f"{p:>9.2f} {r['chsh']:>8.3f} {ideal_e91_chsh(p):>7.3f}  {verdict}")
+            detector = e91_statistical_test(
+                [r["E_ab"], r["E_ab_prime"], r["E_a_prime_b"], r["E_a_prime_b_prime"]],
+                args.shots,
+                alpha=args.alpha,
+            )
+            print(
+                f"{p:>9.2f} {r['chsh']:>8.3f} {detector['lower_bound']:>8.3f} "
+                f"{ideal_e91_chsh(p):>8.3f}  "
+                f"{detector['decision']} -> {detector['operational_decision']}"
+            )
 
 
 if __name__ == "__main__":
