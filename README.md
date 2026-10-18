@@ -183,6 +183,16 @@ python run_ibm.py --backend ibm_torino --eve 0 1 --n 1000 --shots 2000 --hardwar
 - **Circuits are transpiled at optimization level 3**, which picks qubits using calibration data. At level 1 these small circuits land on qubit 0, which on `fake_torino` has about 17% readout error (the median is 2%).
 - E91 Eve attacks use mid-circuit measurement, reset and `if_test`, which IBM's Heron devices support.
 
+### Real hardware validation
+
+On 2026-10-18 the confidence-aware detector was validated on the 156-qubit
+`ibm_fez` QPU and compared with ideal Aer and calibrated `fake_fez` simulation.
+The larger clean BB84 run was accepted with QBER 0.0026 and an upper confidence
+bound of 0.080; full interception was rejected. Clean E91 was accepted with
+S = 2.620 and lower confidence bound 2.182, while full interception was rejected.
+See [HARDWARE_RESULTS.md](HARDWARE_RESULTS.md) for configurations, job IDs,
+limitations, and the comparison figure.
+
 ## Testing
 
 ```bash

@@ -1,0 +1,14 @@
+backend,backend_type,protocol,eve_probability,metric,measured_value,lower_bound,upper_bound,operational_decision,qubits_or_shots,check_bits,job_id,date
+aer,ideal_simulator,BB84,0,QBER,0.0000,0.0000,0.1100,SECURE,512,192,,2026-10-18
+aer,ideal_simulator,BB84,1,QBER,0.2708,0.1610,0.3800,ABORT,512,192,,2026-10-18
+fake_fez,calibrated_simulator,BB84,0,QBER,0.0000,0.0000,0.1100,SECURE,512,192,,2026-10-18
+fake_fez,calibrated_simulator,BB84,1,QBER,0.2188,0.1090,0.3280,ABORT,512,192,,2026-10-18
+ibm_fez,real_hardware,BB84,0,QBER,0.0104,0.0000,0.1200,ABORT,512,192,dbaco68c77vs7382jum0,2026-10-18
+ibm_fez,real_hardware,BB84,1,QBER,0.2552,0.1460,0.3650,ABORT,512,192,dbacoac24mrc73856n1g,2026-10-18
+aer,ideal_simulator,E91,0,CHSH,2.8620,2.4240,3.3000,SECURE,1000,,,2026-10-18
+aer,ideal_simulator,E91,1,CHSH,1.3920,0.9540,1.8300,ABORT,1000,,,2026-10-18
+fake_fez,calibrated_simulator,E91,0,CHSH,2.7460,2.3080,3.1840,SECURE,1000,,,2026-10-18
+fake_fez,calibrated_simulator,E91,1,CHSH,1.3660,0.9280,1.8040,ABORT,1000,,,2026-10-18
+ibm_fez,real_hardware,E91,0,CHSH,2.6200,2.1820,3.0580,SECURE,1000,,dbacoc7i0auc7391qi10,2026-10-18
+ibm_fez,real_hardware,E91,1,CHSH,0.7180,0.2800,1.1560,ABORT,1000,,dbacoe424mrc73856n5g,2026-10-18
+ibm_fez,real_hardware,BB84,0,QBER,0.0026,0.0000,0.0800,SECURE,1024,384,dbacongc77vs7382jv70,2026-10-18
